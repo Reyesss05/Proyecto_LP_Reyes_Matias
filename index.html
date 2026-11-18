@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mejoremos la UCALP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --tinta: #16214A;
+    --tinta-2: #24346E;
+    --fondo: #F2F4F9;
+    --papel: #FFFFFF;
+    --texto: #1A2033;
+    --tenue: #5E677D;
+    --linea: #DCE1EC;
+    --azul: #2E4FD8;
+    --azul-suave: #E6EBFC;
+    --resaltador: #FFD83D;
+    --alta: #D2335F;
+    --media: #D98C0B;
+    --baja: #2A9460;
+    --error: #C42B2B;
+    --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --tinta: #0E1533;
+      --tinta-2: #1C2858;
+      --fondo: #12172A;
+      --papel: #1C2338;
+      --texto: #E8EBF4;
+      --tenue: #A0A8BE;
+      --linea: #313A55;
+      --azul: #8AA2FF;
+      --azul-suave: #27315A;
+      --resaltador: #F5CF2E;
+      --alta: #FF6E92;
+      --media: #F2B544;
+      --baja: #4DC98A;
+      --error: #FF7A7A;
+      color-scheme: dark;
+    }
+    .chip[aria-pressed="true"] { background: #3A50B8 !important; border-color: #3A50B8 !important; }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--fondo);
+    color: var(--texto);
+    font: 16px/1.5 "Figtree", "Segoe UI", system-ui, sans-serif;
+  }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--azul); outline-offset: 2px; }
+  [hidden] { display: none !important; }
+  h1, h2, h3 { font-family: var(--display); }
+
+  /* ---------- Controles comunes ---------- */
+  label { display: grid; gap: 6px; font-size: .9rem; font-weight: 600; }
+  input, select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--linea);
+    border-radius: 10px;
+    background: var(--papel);
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--azul); outline: none; }
+  textarea { resize: vertical; min-height: 96px; }
+  .boton {
+    padding: 11px 20px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--azul);
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .boton:hover { filter: brightness(1.1); }
+  .boton.claro { background: var(--azul-suave); color: var(--azul); }
+  .boton.peligro { background: transparent; color: var(--error); box-shadow: inset 0 0 0 1.5px currentColor; }
+  .mensaje { font-size: .9rem; margin: 0; }
+  .mensaje:empty { display: none; }
+  .mensaje.error { color: var(--error); }
+  .mensaje.ok { color: var(--baja); }
+
+  /* ---------- Acceso ---------- */
+  .acceso {
+    min-height: 100vh;
+    background: var(--tinta);
+    display: grid;
+    place-items: center;
+    padding: 40px 24px;
+  }
+  .acceso-in {
+    width: min(1040px, 100%);
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: clamp(32px, 6vw, 72px);
+    align-items: center;
+  }
+  @media (max-width: 860px) { .acceso-in { grid-template-columns: 1fr; max-width: 480px; } }
+  .acceso-portada { color: #fff; display: grid; gap: 22px; }
+  .post-it {
+    justify-self: start;
+    background: var(--resaltador);
+    color: #2B2300;
+    padding: 14px 18px 16px;
+    border-radius: 3px 3px 3px 18px;
+    transform: rotate(-2.5deg);
+    font-weight: 600;
+    max-width: 32ch;
+    box-shadow: 0 10px 24px rgb(0 0 0 / .25);
+    position: relative;
+  }
+  .post-it::before {
+    content: "";
+    position: absolute;
+    top: -9px;
+    left: 50%;
+    width: 64px;
+    height: 18px;
+    transform: translateX(-50%) rotate(3deg);
+    background: rgb(255 255 255 / .45);
+  }
+  .acceso-portada h1 {
+    font-size: clamp(2.6rem, 5.5vw, 4.2rem);
+    font-weight: 800;
+    line-height: .95;
+    letter-spacing: -0.035em;
+    margin: 0;
+  }
+  .acceso-portada > p { margin: 0; max-width: 42ch; color: #C5CCE6; font-size: 1.08rem; }
+  .cifras { display: flex; gap: 28px; flex-wrap: wrap; }
+  .cifras div { display: grid; }
+  .cifras strong { font-family: var(--display); font-size: 2rem; line-height: 1; }
+  .cifras span { color: #9FA9CF; font-size: .85rem; }
+  .destacados { display: grid; gap: 8px; }
+  .destacados h2 { margin: 0 0 2px; font-size: .95rem; color: #9FA9CF; font-weight: 600; font-family: inherit; }
+  .mini {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    align-items: center;
+    background: var(--tinta-2);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .mini b {
+    display: grid; place-content: center; text-align: center; height: 100%;
+    font-family: var(--display); font-size: 1.15rem; background: rgb(255 255 255 / .06);
+    line-height: 1; padding: 10px 0;
+  }
+  .mini b small { font-family: "Figtree", sans-serif; font-size: .62rem; font-weight: 600; color: #9FA9CF; margin-top: 3px; }
+  .mini p { margin: 0; padding: 10px 14px; font-size: .95rem; line-height: 1.3; }
+  .mini p span { display: block; font-size: .78rem; color: #9FA9CF; margin-top: 2px; }
+  .tarjeta-acceso {
+    background: var(--papel);
+    border-radius: 24px;
+    padding: clamp(24px, 4vw, 36px);
+    display: grid;
+    gap: 18px;
+    box-shadow: 0 30px 60px rgb(0 0 0 / .3);
+  }
+  .tarjeta-acceso h2 { margin: 0; font-size: 1.6rem; letter-spacing: -0.02em; }
+  .tarjeta-acceso h2 + p { margin: -10px 0 0; color: var(--tenue); }
+  .pestanas { display: flex; background: var(--fondo); border-radius: 12px; padding: 4px; }
+  .pestanas button {
+    flex: 1; padding: 9px; border: 0; background: transparent;
+    border-radius: 9px; font-weight: 600; color: var(--tenue); cursor: pointer;
+  }
+  .pestanas button[aria-selected="true"] { background: var(--papel); color: var(--texto); box-shadow: 0 1px 3px rgb(0 0 0 / .12); }
+  .formulario { display: grid; gap: 14px; }
+  .pista { font-size: .85rem; color: var(--tenue); margin: 0; }
+  .pista code { background: var(--fondo); padding: 1px 6px; border-radius: 5px; }
+
+  /* ---------- Cabecera del panel ---------- */
+  .cabecera { background: var(--tinta); color: #fff; }
+  .cabecera-in { max-width: 1080px; margin: 0 auto; padding: 18px 24px 36px; }
+  .barra { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .logo { font-family: var(--display); font-weight: 800; font-size: 1.05rem; letter-spacing: -0.01em; }
+  .quien { display: flex; align-items: center; gap: 12px; font-size: .95rem; }
+  .rol { padding: 2px 10px; border-radius: 99px; background: var(--tinta-2); font-weight: 700; font-size: .8rem; color: #DCE3FF; }
+  .salir { background: none; border: 0; color: #C5CCE6; cursor: pointer; text-decoration: underline; }
+  .bienvenida { display: flex; align-items: end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-top: 36px; }
+  .bienvenida h1 { margin: 0; font-size: clamp(2rem, 4.5vw, 3.2rem); line-height: 1; letter-spacing: -0.03em; font-weight: 800; }
+  .bienvenida p { margin: 10px 0 0; color: #C5CCE6; }
+  .boton.reportar { background: var(--resaltador); color: #2B2300; padding: 14px 24px; font-size: 1.05rem; }
+
+  /* ---------- Contenido ---------- */
+  .contenido { max-width: 1080px; margin: 0 auto; padding: 0 24px 60px; }
+  .filtros {
+    background: var(--papel);
+    border-radius: 16px;
+    padding: 16px;
+    margin-top: -20px;
+    display: grid;
+    gap: 14px;
+    position: relative;
+    box-shadow: 0 6px 24px rgb(22 33 74 / .08);
+  }
+  .estados { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    border: 1.5px solid var(--linea);
+    background: var(--papel);
+    border-radius: 99px;
+    padding: 6px 14px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: .9rem;
+  }
+  .chip span { color: var(--tenue); font-weight: 500; margin-left: 4px; }
+  .chip[aria-pressed="true"] { background: var(--tinta); color: #fff; border-color: var(--tinta); }
+  .chip[aria-pressed="true"] span { color: #C5CCE6; }
+  .selects { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .selects select { width: auto; padding: 7px 10px; font-size: .9rem; }
+  .interruptor { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: .9rem; cursor: pointer; margin-left: auto; }
+  .interruptor input { width: 18px; height: 18px; accent-color: var(--azul); }
+
+  .columnas {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 24px;
+    align-items: start;
+    margin-top: 22px;
+  }
+  @media (max-width: 900px) { .columnas { grid-template-columns: 1fr; } .lateral { position: static; } }
+  .lista { display: grid; gap: 12px; }
+  .lateral { display: grid; gap: 18px; position: sticky; top: 20px; }
+  .lateral .post-it { transform: rotate(1.5deg); max-width: none; justify-self: stretch; }
+  .lateral .post-it h2 { margin: 0 0 8px; font-size: 1.1rem; }
+  .lateral .post-it ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; font-size: .92rem; font-weight: 500; }
+  .caja { background: var(--papel); border-radius: 16px; padding: 18px; }
+  .caja h2 { margin: 0 0 10px; font-size: 1rem; }
+  .categorias { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+  .categorias button {
+    width: 100%; display: flex; justify-content: space-between; gap: 8px;
+    padding: 8px 10px; border: 0; background: transparent; border-radius: 8px; cursor: pointer; text-align: left;
+    font-size: .92rem;
+  }
+  .categorias button:hover { background: var(--fondo); }
+  .categorias button[aria-pressed="true"] { background: var(--azul-suave); color: var(--azul); font-weight: 700; }
+  .categorias span { color: var(--tenue); font-weight: 600; }
+  .barras { display: flex; height: 10px; border-radius: 99px; overflow: hidden; background: var(--fondo); margin: 4px 0 10px; }
+  .barras i { display: block; }
+  .leyenda { display: grid; gap: 4px; font-size: .88rem; }
+  .leyenda div { display: flex; justify-content: space-between; }
+  .leyenda span::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 8px; background: var(--c); }
+  .vacio { padding: 48px 20px; text-align: center; color: var(--tenue); background: var(--papel); border-radius: 16px; }
+
+  /* ---------- Reporte ---------- */
+  .reporte {
+    display: grid;
+    grid-template-columns: 76px 1fr;
+    background: var(--papel);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .apoyo {
+    border: 0;
+    border-right: 1px solid var(--linea);
+    background: transparent;
+    cursor: pointer;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 2px;
+    padding: 12px 4px;
+    color: var(--tenue);
+  }
+  .apoyo strong { font-family: var(--display); font-size: 1.6rem; line-height: 1; color: var(--texto); }
+  .apoyo small { font-size: .7rem; font-weight: 600; line-height: 1.2; text-align: center; }
+  .apoyo .flecha { font-size: .9rem; }
+  .apoyo:hover:not(:disabled) { background: var(--fondo); }
+  .apoyo[aria-pressed="true"], .apoyo[aria-pressed="true"]:hover:not(:disabled) { background: var(--resaltador); color: #4A3D00; }
+  .apoyo[aria-pressed="true"] strong { color: #2B2300; }
+  .apoyo:disabled { cursor: default; }
+  .reporte-cuerpo {
+    border: 0; background: transparent; text-align: left; cursor: pointer;
+    padding: 16px 20px; display: grid; gap: 6px; min-width: 0;
+  }
+  .reporte-cuerpo:hover h3 { color: var(--azul); }
+  .etiquetas { display: flex; flex-wrap: wrap; gap: 6px; }
+  .etiqueta { font-size: .78rem; font-weight: 700; padding: 2px 9px; border-radius: 6px; background: var(--fondo); color: var(--tenue); }
+  .etiqueta.mejora { background: var(--azul-suave); color: var(--azul); }
+  .etiqueta.prio-alta { color: var(--alta); }
+  .etiqueta.prio-media { color: var(--media); }
+  .etiqueta.prio-baja { color: var(--baja); }
+  .reporte h3 { margin: 0; font-size: 1.15rem; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+  .datos { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .85rem; color: var(--tenue); }
+  .estado { font-weight: 700; color: var(--texto); white-space: nowrap; }
+  .estado::before {
+    content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    margin-right: 6px; background: var(--azul); vertical-align: 1px;
+  }
+  .estado.en_progreso::before { background: var(--media); }
+  .estado.resuelto::before { background: var(--baja); }
+  .estado.cerrado::before { background: var(--tenue); }
+
+  /* ---------- Diálogos ---------- */
+  dialog {
+    width: min(640px, calc(100% - 24px));
+    max-height: calc(100vh - 40px);
+    border: 0;
+    border-radius: 20px;
+    padding: 0;
+    background: var(--papel);
+    color: var(--texto);
+  }
+  dialog::backdrop { background: rgb(14 20 45 / .6); }
+  .dlg-cab { padding: 24px 56px 18px 24px; border-bottom: 1px solid var(--linea); }
+  .dlg-cab h2 { margin: 8px 0 8px; font-size: 1.45rem; line-height: 1.2; overflow-wrap: anywhere; }
+  .dlg-cuerpo { padding: 20px 24px 24px; display: grid; gap: 18px; }
+  .cerrar {
+    position: absolute; top: 14px; right: 14px; width: 36px; height: 36px;
+    border: 0; border-radius: 50%; background: var(--fondo); font-size: 1.3rem; cursor: pointer; color: var(--tenue); line-height: 1;
+  }
+  .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 520px) { .dos { grid-template-columns: 1fr; } }
+  .segmento { display: flex; gap: 8px; }
+  .segmento label {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 10px; border: 1.5px solid var(--linea); border-radius: 10px; cursor: pointer;
+  }
+  .segmento input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .segmento label:has(input:checked) { border-color: var(--azul); background: var(--azul-suave); color: var(--azul); }
+  .segmento label:has(input:focus-visible) { outline: 3px solid var(--azul); outline-offset: 2px; }
+  .descripcion { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 1.02rem; }
+  .gestion { display: grid; gap: 12px; padding: 16px; background: var(--fondo); border-radius: 14px; }
+  .gestion h3 { margin: 0; font-size: .95rem; }
+  .fila { display: flex; gap: 10px; align-items: end; }
+  .fila label { flex: 1; }
+  .fila .boton { min-width: 140px; }
+  .comentarios { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  .comentarios li { padding: 10px 14px; border-left: 3px solid var(--linea); }
+  .comentarios li.staff { border-left-color: var(--azul); }
+  .comentarios .autor { font-weight: 700; font-size: .88rem; }
+  .comentarios .fecha { color: var(--tenue); font-size: .8rem; margin-left: 8px; }
+  .comentarios p { margin: 2px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .seccion-tit { margin: 0 0 10px; font-size: 1rem; }
+
+  @media (max-width: 600px) {
+    .reporte { grid-template-columns: 64px 1fr; }
+    .interruptor { margin-left: 0; }
+    .fila { flex-direction: column; align-items: stretch; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= Acceso ================= -->
+<main id="vista-acceso" class="acceso">
+  <div class="acceso-in">
+    <section class="acceso-portada">
+      <div class="post-it">¿El proyector no anda? ¿Falta un enchufe? Contalo acá y seguí cómo se resuelve.</div>
+      <h1>Mejoremos la UCALP</h1>
+      <p>Alumnos y docentes reportan problemas o proponen mejoras. Las áreas de la universidad los toman y avisan cuando están resueltos.</p>
+      <div class="cifras" id="cifras"></div>
+      <div class="destacados" id="destacados"></div>
+    </section>
+
+    <section class="tarjeta-acceso">
+      <h2>Entrá con tu cuenta</h2>
+      <p>Para reportar y sumarte a lo que ya reportaron otros.</p>
+      <div class="pestanas" role="tablist">
+        <button role="tab" aria-selected="true" data-tab="ingresar">Ingresar</button>
+        <button role="tab" aria-selected="false" data-tab="registrar">Crear cuenta</button>
+      </div>
+      <form id="form-ingresar" class="formulario">
+        <label>Usuario <input name="username" required autocomplete="username"></label>
+        <label>Contraseña <input name="password" type="password" required autocomplete="current-password"></label>
+        <button class="boton">Ingresar</button>
+        <p class="mensaje" id="msg-ingresar"></p>
+      </form>
+      <form id="form-registrar" class="formulario" hidden>
+        <label>Usuario <input name="username" required autocomplete="username"></label>
+        <label>Contraseña <input name="password" type="password" required autocomplete="new-password"></label>
+        <label>Soy
+          <select name="rol">
+            <option value="alumno">Alumno</option>
+            <option value="docente">Docente</option>
+          </select>
+        </label>
+        <button class="boton">Crear cuenta</button>
+        <p class="mensaje" id="msg-registrar"></p>
+      </form>
+      <p class="pista">Cuentas de prueba: <code>alumno_demo</code> / <code>1234</code>, <code>mantenimiento</code> / <code>resp123</code>, <code>admin</code> / <code>admin123</code></p>
+    </section>
+  </div>
+</main>
+
+<!-- ================= Panel ================= -->
+<div id="vista-panel" hidden>
+  <header class="cabecera">
+    <div class="cabecera-in">
+      <div class="barra">
+        <span class="logo">Mejoremos la UCALP</span>
+        <div class="quien">
+          <span id="yo-nombre"></span>
+          <span class="rol" id="yo-rol"></span>
+          <button class="salir" id="btn-salir">Salir</button>
+        </div>
+      </div>
+      <div class="bienvenida">
+        <div>
+          <h1 id="saludo"></h1>
+          <p id="resumen"></p>
+        </div>
+        <button class="boton reportar" id="btn-reportar">Reportar algo</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="contenido">
+    <div class="filtros">
+      <div class="estados" id="estados"></div>
+      <div class="selects">
+        <select id="f-categoria" aria-label="Categoría"><option value="">Todas las categorías</option></select>
+        <select id="f-tipo" aria-label="Tipo">
+          <option value="">Problemas y mejoras</option>
+          <option value="problema">Solo problemas</option>
+          <option value="mejora">Solo propuestas de mejora</option>
+        </select>
+        <select id="f-prioridad" aria-label="Urgencia">
+          <option value="">Cualquier urgencia</option>
+          <option value="alta">Urgencia alta</option>
+          <option value="media">Urgencia media</option>
+          <option value="baja">Urgencia baja</option>
+        </select>
+        <label class="interruptor"><input type="checkbox" id="f-mios"> <span id="txt-mios">Solo los míos</span></label>
+      </div>
+    </div>
+    <div class="columnas">
+      <div class="lista" id="lista"></div>
+      <aside class="lateral">
+        <div class="post-it">
+          <h2>¿Cómo funciona?</h2>
+          <ol>
+            <li>Reportás un problema o una idea.</li>
+            <li>Si a otros les pasa, tocan «me pasa».</li>
+            <li>El área responsable lo toma y te responde en los comentarios.</li>
+          </ol>
+        </div>
+        <div class="caja">
+          <h2>Avance</h2>
+          <div class="barras" id="barras"></div>
+          <div class="leyenda" id="leyenda"></div>
+        </div>
+        <div class="caja">
+          <h2>Por categoría</h2>
+          <ul class="categorias" id="categorias"></ul>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<!-- ================= Nuevo reporte ================= -->
+<dialog id="dlg-nuevo">
+  <button class="cerrar" aria-label="Cerrar" data-cerrar>×</button>
+  <div class="dlg-cab"><h2>Nuevo reporte</h2><p class="pista">Mientras más claro, más rápido lo pueden resolver.</p></div>
+  <form id="form-ticket" class="formulario dlg-cuerpo">
+    <div class="segmento" role="radiogroup" aria-label="Tipo de reporte">
+      <label><input type="radio" name="tipo" value="problema" checked> Algo no funciona</label>
+      <label><input type="radio" name="tipo" value="mejora"> Tengo una idea</label>
+    </div>
+    <label>Título <input name="titulo" required maxlength="120" placeholder="Ej.: El proyector del aula 12 no enciende"></label>
+    <label>Contanos más <textarea name="descripcion" required placeholder="Qué pasa, desde cuándo, a quién afecta"></textarea></label>
+    <div class="dos">
+      <label>Categoría <select name="categoria" id="n-categoria" required></select></label>
+      <label>Urgencia
+        <select name="prioridad">
+          <option value="baja">Baja</option>
+          <option value="media" selected>Media</option>
+          <option value="alta">Alta</option>
+        </select>
+      </label>
+    </div>
+    <label>Dónde (opcional) <input name="ubicacion" maxlength="80" placeholder="Ej.: Aula 12, 2.º piso"></label>
+    <p class="mensaje" id="msg-ticket"></p>
+    <button class="boton">Publicar reporte</button>
+  </form>
+</dialog>
+
+<!-- ================= Detalle ================= -->
+<dialog id="dlg-detalle">
+  <button class="cerrar" aria-label="Cerrar" data-cerrar>×</button>
+  <div id="detalle"></div>
+</dialog>
+
+<script>
+const ESTADOS = { "": "Todos", abierto: "Abierto", en_progreso: "En progreso", resuelto: "Resuelto", cerrado: "Cerrado" };
+const CATEGORIAS = {
+  aulas: "🏫 Aulas y edificio",
+  wifi: "📶 Wi-Fi e informática",
+  campus_virtual: "💻 Campus virtual",
+  tramites: "📄 Trámites",
+  biblioteca: "📚 Biblioteca",
+  banos: "🧻 Baños y limpieza",
+  otra: "💬 Otra",
+};
+const URGENCIA = { alta: "Urgencia alta", media: "Urgencia media", baja: "Urgencia baja" };
+
+let sesion = JSON.parse(sessionStorage.getItem("sesion") || "null");
+let filtroEstado = "";
+const $ = (s) => document.querySelector(s);
+
+function esc(t) {
+  const d = document.createElement("div");
+  d.textContent = t ?? "";
+  return d.innerHTML;
+}
+function fecha(iso) {
+  const [d, h] = iso.split("T");
+  const [a, m, dia] = d.split("-");
+  return `${dia}/${m}/${a} ${h.slice(0, 5)}`;
+}
+function mostrar(sel, texto, tipo = "error") {
+  const el = $(sel);
+  el.textContent = texto;
+  el.className = "mensaje " + tipo;
+}
+
+// Completa los selects de categoría
+for (const [k, v] of Object.entries(CATEGORIAS)) {
+  $("#f-categoria").insertAdjacentHTML("beforeend", `<option value="${k}">${v}</option>`);
+  $("#n-categoria").insertAdjacentHTML("beforeend", `<option value="${k}">${v}</option>`);
+}
+
+// ---------- API ----------
+async function api(ruta, metodo = "GET", cuerpo = null) {
+  const op = { method: metodo, headers: {} };
+  if (sesion) op.headers.Authorization = "Bearer " + sesion.token;
+  if (cuerpo) {
+    op.headers["Content-Type"] = "application/json";
+    op.body = JSON.stringify(cuerpo);
+  }
+  const r = await fetch(ruta, op);
+  const datos = await r.json().catch(() => ({}));
+  if (r.status === 401 && sesion) {
+    salir();
+    throw new Error("Tu sesión venció. Ingresá de nuevo.");
+  }
+  if (!r.ok) {
+    const det = datos.detail;
+    throw new Error(Array.isArray(det) ? "Revisá los datos ingresados." : det || "Error " + r.status);
+  }
+  return datos;
+}
+
+// ---------- Acceso ----------
+function elegirPestana(nombre) {
+  document.querySelectorAll(".pestanas button").forEach((b) => b.setAttribute("aria-selected", b.dataset.tab === nombre));
+  $("#form-ingresar").hidden = nombre !== "ingresar";
+  $("#form-registrar").hidden = nombre !== "registrar";
+}
+document.querySelectorAll(".pestanas button").forEach((b) => b.addEventListener("click", () => elegirPestana(b.dataset.tab)));
+
+async function ingresar(username, password) {
+  const r = await api("/login", "POST", { username, password });
+  sesion = { username, token: r.access_token, rol: r.rol };
+  sessionStorage.setItem("sesion", JSON.stringify(sesion));
+  abrirPanel();
+}
+$("#form-ingresar").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  try { await ingresar(f.get("username"), f.get("password")); e.target.reset(); mostrar("#msg-ingresar", ""); }
+  catch (err) { mostrar("#msg-ingresar", err.message); }
+});
+$("#form-registrar").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  try {
+    await api("/alta_usuario", "POST", Object.fromEntries(f));
+    await ingresar(f.get("username"), f.get("password"));
+    e.target.reset();
+    mostrar("#msg-registrar", "");
+  } catch (err) { mostrar("#msg-registrar", err.message); }
+});
+
+async function cargarResumen() {
+  try {
+    const r = await (await fetch("/resumen")).json();
+    $("#cifras").innerHTML = `
+      <div><strong>${r.total}</strong><span>reportes</span></div>
+      <div><strong>${r.en_progreso}</strong><span>en progreso</span></div>
+      <div><strong>${r.resueltos}</strong><span>${r.resueltos === 1 ? "resuelto" : "resueltos"}</span></div>`;
+    $("#destacados").innerHTML = r.destacados.length ? `<h2>Lo que más les pasa ahora</h2>` +
+      r.destacados.map((d) => `<div class="mini"><b>${d.apoyos}<small>me pasa</small></b>
+        <p>${esc(d.titulo)}<span>${CATEGORIAS[d.categoria]}, ${ESTADOS[d.estado].toLowerCase()}</span></p></div>`).join("") : "";
+  } catch { /* si falla, la portada queda solo con el texto */ }
+}
+
+function salir() {
+  sesion = null;
+  sessionStorage.removeItem("sesion");
+  document.querySelectorAll("dialog[open]").forEach((d) => d.close());
+  $("#vista-panel").hidden = true;
+  $("#vista-acceso").hidden = false;
+  elegirPestana("ingresar");
+  cargarResumen();
+}
+$("#btn-salir").addEventListener("click", salir);
+
+// ---------- Panel ----------
+const esStaff = () => sesion.rol === "responsable" || sesion.rol === "admin";
+
+function abrirPanel() {
+  $("#vista-acceso").hidden = true;
+  $("#vista-panel").hidden = false;
+  $("#yo-nombre").textContent = sesion.username;
+  $("#yo-rol").textContent = sesion.rol;
+  $("#saludo").textContent = esStaff() ? "Reportes de la comunidad" : `Hola, ${sesion.username}`;
+  $("#txt-mios").textContent = sesion.rol === "responsable" ? "Solo los que atiendo" : "Solo los míos";
+  cargar();
+}
+
+function filtrosActuales(conEstado) {
+  const p = new URLSearchParams();
+  for (const id of ["categoria", "tipo", "prioridad"]) {
+    const v = $("#f-" + id).value;
+    if (v) p.set(id, v);
+  }
+  if ($("#f-mios").checked) p.set("mios", "true");
+  if (conEstado && filtroEstado) p.set("estado", filtroEstado);
+  return p.toString();
+}
+
+async function cargar() {
+  try {
+    const [todos, lista] = await Promise.all([
+      api("/tickets?" + filtrosActuales(false)),
+      api("/tickets?" + filtrosActuales(true)),
+    ]);
+    pintarEstados(todos);
+    pintarLista(lista);
+    pintarLateral(todos);
+    const abiertos = todos.filter((t) => t.estado === "abierto").length;
+    const resueltos = todos.filter((t) => t.estado === "resuelto").length;
+    $("#resumen").textContent =
+      `${abiertos} sin atender y ${resueltos} ${resueltos === 1 ? "resuelto" : "resueltos"}. Los más apoyados aparecen primero.`;
+  } catch (err) {
+    $("#lista").innerHTML = `<p class="vacio">${esc(err.message)}</p>`;
+  }
+}
+
+function pintarEstados(todos) {
+  $("#estados").innerHTML = Object.entries(ESTADOS).map(([k, n]) => {
+    const c = k ? todos.filter((t) => t.estado === k).length : todos.length;
+    return `<button class="chip" data-estado="${k}" aria-pressed="${k === filtroEstado}">${n}<span>${c}</span></button>`;
+  }).join("");
+  $("#estados").querySelectorAll("button").forEach((b) =>
+    b.addEventListener("click", () => { filtroEstado = b.dataset.estado; cargar(); }));
+}
+
+async function pintarLateral(todos) {
+  // Avance: proporción de cada estado
+  const colores = { abierto: "var(--azul)", en_progreso: "var(--media)", resuelto: "var(--baja)", cerrado: "var(--tenue)" };
+  const total = todos.length || 1;
+  const cuenta = (e) => todos.filter((t) => t.estado === e).length;
+  $("#barras").innerHTML = Object.keys(colores)
+    .map((e) => `<i style="width:${(cuenta(e) / total) * 100}%;background:${colores[e]}"></i>`).join("");
+  $("#leyenda").innerHTML = Object.keys(colores)
+    .map((e) => `<div><span style="--c:${colores[e]}">${ESTADOS[e]}</span><b>${cuenta(e)}</b></div>`).join("");
+
+  // Por categoría: se cuenta sin el filtro de categoría para ver todas
+  const p = new URLSearchParams(filtrosActuales(false));
+  p.delete("categoria");
+  const base = await api("/tickets?" + p);
+  const actual = $("#f-categoria").value;
+  $("#categorias").innerHTML = Object.entries(CATEGORIAS).map(([k, n]) => {
+    const c = base.filter((t) => t.categoria === k).length;
+    return `<li><button data-cat="${k}" aria-pressed="${k === actual}">${n}<span>${c}</span></button></li>`;
+  }).join("");
+  $("#categorias").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
+    $("#f-categoria").value = b.dataset.cat === actual ? "" : b.dataset.cat;
+    cargar();
+  }));
+}
+
+function botonApoyo(t) {
+  const mio = t.autor === sesion.username;
+  const apoyado = t.apoyos.includes(sesion.username);
+  const bloqueado = mio || t.estado === "cerrado";
+  const texto = mio ? "tu reporte" : apoyado ? "te pasa" : "me pasa";
+  return `<button class="apoyo" data-apoyo="${t.id}" aria-pressed="${apoyado}" ${bloqueado ? "disabled" : ""}
+    title="${mio ? "No podés apoyar tu propio reporte" : "A mí también me pasa"}">
+    <span class="flecha" aria-hidden="true">▲</span><strong>${t.apoyos.length}</strong><small>${texto}</small></button>`;
+}
+
+function etiquetas(t) {
+  return `<div class="etiquetas">
+    <span class="etiqueta">${CATEGORIAS[t.categoria]}</span>
+    ${t.tipo === "mejora" ? `<span class="etiqueta mejora">Propuesta de mejora</span>` : ""}
+    <span class="etiqueta prio-${t.prioridad}">${URGENCIA[t.prioridad]}</span>
+  </div>`;
+}
+
+function datos(t) {
+  return `<div class="datos">
+    <span class="estado ${t.estado}">${ESTADOS[t.estado]}</span>
+    ${t.ubicacion ? `<span>📍 ${esc(t.ubicacion)}</span>` : ""}
+    <span>Por ${esc(t.autor)}</span>
+    <span>${t.asignado_a ? "Lo atiende " + esc(t.asignado_a) : "Sin asignar"}</span>
+    <span>💬 ${t.comentarios.length}</span>
+  </div>`;
+}
+
+function pintarLista(lista) {
+  if (!lista.length) {
+    const hayFiltros = filtroEstado || filtrosActuales(false);
+    $("#lista").innerHTML = `<p class="vacio">${hayFiltros
+      ? "No hay reportes con estos filtros."
+      : "Todavía no hay reportes. Usá «Reportar algo» para crear el primero."}</p>`;
+    return;
+  }
+  $("#lista").innerHTML = lista.map((t) => `
+    <article class="reporte">
+      ${botonApoyo(t)}
+      <button class="reporte-cuerpo" data-abrir="${t.id}">
+        ${etiquetas(t)}
+        <h3>${esc(t.titulo)}</h3>
+        ${datos(t)}
+      </button>
+    </article>`).join("");
+  conectarApoyos($("#lista"));
+  $("#lista").querySelectorAll("[data-abrir]").forEach((b) =>
+    b.addEventListener("click", () => abrirDetalle(Number(b.dataset.abrir))));
+}
+
+function conectarApoyos(contenedor, alTerminar) {
+  contenedor.querySelectorAll("[data-apoyo]").forEach((b) => b.addEventListener("click", async () => {
+    try {
+      await api(`/tickets/${b.dataset.apoyo}/apoyo`, "POST");
+      if (alTerminar) await alTerminar();
+      cargar();
+    } catch (err) { alert(err.message); }
+  }));
+}
+
+for (const id of ["f-categoria", "f-tipo", "f-prioridad", "f-mios"]) $("#" + id).addEventListener("change", cargar);
+
+// ---------- Nuevo reporte ----------
+$("#btn-reportar").addEventListener("click", () => { mostrar("#msg-ticket", ""); $("#dlg-nuevo").showModal(); });
+$("#form-ticket").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  try {
+    await api("/tickets", "POST", Object.fromEntries(new FormData(e.target)));
+    e.target.reset();
+    $("#dlg-nuevo").close();
+    filtroEstado = "";
+    cargar();
+  } catch (err) { mostrar("#msg-ticket", err.message); }
+});
+document.querySelectorAll("[data-cerrar]").forEach((b) => b.addEventListener("click", () => b.closest("dialog").close()));
+
+// ---------- Detalle ----------
+async function abrirDetalle(id) {
+  try {
+    const t = await api("/tickets/" + id);
+    const responsables = sesion.rol === "admin" ? await api("/usuarios_responsables") : [];
+    pintarDetalle(t, responsables);
+    if (!$("#dlg-detalle").open) $("#dlg-detalle").showModal();
+  } catch (err) { alert(err.message); }
+}
+
+function pintarDetalle(t, responsables) {
+  const puedeEstado = sesion.rol === "admin" || (sesion.rol === "responsable" && t.asignado_a === sesion.username);
+  const puedeTomar = sesion.rol === "responsable" && !t.asignado_a;
+  let gestion = "";
+  if (puedeTomar) gestion += `<button class="boton" data-accion="tomar">Tomar este reporte</button>`;
+  if (puedeEstado) gestion += `<div class="fila"><label>Estado
+      <select id="d-estado">${Object.entries(ESTADOS).filter(([k]) => k)
+        .map(([k, n]) => `<option value="${k}" ${k === t.estado ? "selected" : ""}>${n}</option>`).join("")}</select>
+    </label><button class="boton claro" data-accion="estado">Guardar estado</button></div>`;
+  if (sesion.rol === "admin") gestion += `<div class="fila"><label>Asignar a
+      <select id="d-asignar">${responsables.length
+        ? responsables.map((u) => `<option ${u === t.asignado_a ? "selected" : ""}>${esc(u)}</option>`).join("")
+        : "<option disabled>No hay responsables</option>"}</select>
+    </label><button class="boton claro" data-accion="asignar">Asignar</button></div>
+    <div><button class="boton peligro" data-accion="borrar">Eliminar reporte</button></div>`;
+
+  const staffNombres = new Set([t.asignado_a, "admin"]);
+  $("#detalle").innerHTML = `
+    <div class="dlg-cab">
+      ${etiquetas(t)}
+      <h2>${esc(t.titulo)}</h2>
+      ${datos(t)}
+    </div>
+    <div class="dlg-cuerpo">
+      <p class="descripcion">${esc(t.descripcion)}</p>
+      <div class="reporte" style="grid-template-columns:76px 1fr;background:var(--fondo)">
+        ${botonApoyo(t)}
+        <p class="pista" style="padding:14px 18px;align-self:center">
+          ${t.apoyos.length === 0 ? "Nadie se sumó todavía."
+            : t.apoyos.length === 1 ? "1 persona dijo que también le pasa."
+            : t.apoyos.length + " personas dijeron que también les pasa."}
+          Publicado el ${fecha(t.creado)}.
+        </p>
+      </div>
+      ${gestion ? `<div class="gestion"><h3>Gestión</h3>${gestion}</div>` : ""}
+      <p class="mensaje" id="msg-detalle"></p>
+      <div>
+        <h3 class="seccion-tit">Comentarios</h3>
+        ${t.comentarios.length ? `<ul class="comentarios">${t.comentarios.map((c) => `
+          <li class="${staffNombres.has(c.autor) ? "staff" : ""}"><span class="autor">${esc(c.autor)}</span><span class="fecha">${fecha(c.fecha)}</span>
+          <p>${esc(c.texto)}</p></li>`).join("")}</ul>` : `<p class="pista">Nadie comentó todavía.</p>`}
+      </div>
+      ${t.estado !== "cerrado" ? `
+        <form id="form-comentario" class="formulario">
+          <label>Tu comentario <textarea name="texto" required></textarea></label>
+          <button class="boton">Comentar</button>
+        </form>` : `<p class="pista">El reporte está cerrado y no admite comentarios.</p>`}
+    </div>`;
+
+  const cont = $("#detalle");
+  conectarApoyos(cont, () => abrirDetalle(t.id));
+  cont.querySelectorAll("[data-accion]").forEach((b) => b.addEventListener("click", () => accion(t.id, b.dataset.accion)));
+  const fc = cont.querySelector("#form-comentario");
+  if (fc) fc.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    try {
+      await api(`/tickets/${t.id}/comentarios`, "POST", { texto: new FormData(fc).get("texto") });
+      await abrirDetalle(t.id);
+      cargar();
+    } catch (err) { mostrar("#msg-detalle", err.message); }
+  });
+}
+
+async function accion(id, cual) {
+  try {
+    if (cual === "tomar") await api(`/tickets/${id}/tomar`, "PUT");
+    if (cual === "estado") await api(`/tickets/${id}/estado`, "PUT", { estado: $("#d-estado").value });
+    if (cual === "asignar") await api(`/tickets/${id}/asignar`, "PUT", { username_responsable: $("#d-asignar").value });
+    if (cual === "borrar") {
+      if (!confirm(`¿Eliminar el reporte #${id}? No se puede deshacer.`)) return;
+      await api(`/tickets/${id}`, "DELETE");
+      $("#dlg-detalle").close();
+      cargar();
+      return;
+    }
+    await abrirDetalle(id);
+    cargar();
+  } catch (err) { mostrar("#msg-detalle", err.message); }
+}
+
+if (sesion) abrirPanel(); else cargarResumen();
+</script>
+</body>
+</html>
